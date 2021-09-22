@@ -1,0 +1,103 @@
+<?php
+
+namespace YOOtheme\Theme;
+
+use YOOtheme\Config;
+use YOOtheme\Event;
+use YOOtheme\Http\Request;
+use YOOtheme\Http\Response;
+use YOOtheme\Path;
+use YOOtheme\Storage;
+use YOOtheme\Url;
+
+class StylerController
+{
+    public static function index(Request $request, Response $response, Storage $storage)
+    {
+        return $response->withJson((object) $storage('styler.library'));
+    }
+
+    public static function addStyle(Request $request, Response $response, Storage $storage)
+    {
+        $storage->set("styler.library.{$request('id')}", $request('style'));
+
+        return $response->withJson(['message' => 'success']);
+    }
+
+    public static function removeStyle(Request $request, Response $response, Storage $storage)
+    {
+        $storage->del("styler.library.{$request('id')}");
+
+        return $response->withJson(['message' => 'success']);
+    }
+
+    public static function loadStyle(Request $request, Response $response, Config $config, Styler $styler)
+    {
+        $styles = [];
+
+        // add styles
+        foreach ($styler->getThemes() as $theme) {
+
+            $file = $theme['file'];
+            $styles[$theme['id']] = [
+                'filename' => Url::to($file),
+                'contents' => file_get_contents($file),
+            ];
+
+        }
+
+        $themeId = explode('::', $request('id', ''))[0];
+
+        return $response->withJson([
+            'styles' => $styles,
+            'imports' => Event::emit('styler.imports|filter', [], $themeId),
+            'vars' => $config('theme.styles.vars'),
+            'desturl' => Url::to('~theme/css'),
+        ]);
+    }
+
+    public static function saveStyle(Request $request, Response $response, Config $config, StyleFontLoader $font)
+    {
+        $upload = $request->getUploadedFile('files');
+
+        // validate uploads
+        $request->abortIf(!$upload || $upload->getError(), 400, 'Invalid file upload.')
+                ->abortIf(!$contents = (string) $upload->getStream(), 400, 'Unable to read contents file.')
+                ->abortIf(!$contents = @base64_decode($contents), 400, 'Base64 Decode failed.')
+                ->abortIf(!$files = @json_decode($contents, true), 400, 'Unable to decode JSON from temporary file.');
+
+        foreach ($files as $file => $data) {
+
+            $dir = Path::get('~theme/css');
+            $rtl = strpos($file, '.rtl') ? '.rtl' : '';
+
+            try {
+
+                // save fonts for theme style
+                if ($matches = $font->parse($data)) {
+
+                    list($import, $url) = $matches;
+
+                    if ($fonts = $font->css($url, $dir)) {
+                        $data = str_replace($import, $fonts, $data);
+                    }
+                }
+
+            } catch (\RuntimeException $e) {}
+
+            $head = "/* YOOtheme Pro v{$config('theme.version')} compiled on " . date(DATE_W3C) . " */\n";
+
+            // save css for theme style
+            if (!file_put_contents($file = "{$dir}/theme.{$config('theme.id')}{$rtl}.css", $head . $data)) {
+                $request->abort(500, sprintf('Unable to write file (%s).', $file));
+            }
+
+            // save css for theme as default/fallback
+            if ($config('theme.default') && !file_put_contents($file = "{$dir}/theme{$rtl}.css", $head . $data)) {
+                $request->abort(500, sprintf('Unable to write file (%s).', $file));
+            }
+        }
+
+        return $response->withJson(['message' => 'success']);
+    }
+}

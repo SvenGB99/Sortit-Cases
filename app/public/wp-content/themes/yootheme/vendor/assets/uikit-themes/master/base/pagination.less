@@ -1,0 +1,118 @@
+//
+// Component: Pagination
+//
+// ========================================================================
+
+
+// Variables
+// ========================================================================
+
+//
+// New
+//
+
+@pagination-item-min-width:                     0;
+@pagination-item-line-height:                   @global-line-height;
+@pagination-item-background:                    transparent;
+@pagination-item-hover-background:              transparent;
+@pagination-item-active-background:             transparent;
+@pagination-item-disabled-background:           transparent;
+
+@internal-pagination-item-mode:                 ; // flicker
+
+@pagination-item-next-previous-color:           inherit;
+@pagination-item-next-previous-hover-color:     inherit;
+
+@internal-pagination-item-next-previous-mode:   ; // animate
+
+
+// Component
+// ========================================================================
+
+.hook-pagination() {}
+
+
+// Items
+// ========================================================================
+
+.hook-pagination-item() {
+    box-sizing: border-box;
+    min-width: @pagination-item-min-width;
+    background: @pagination-item-background;
+    line-height: @pagination-item-line-height;
+    text-align: center;
+    transition: 0.1s ease-in-out;
+    transition-property: color, background-color, border-color, box-shadow;
+}
+
+.hook-pagination-item() when not (@base-link-text-decoration = none) {
+    text-decoration: none;
+}
+
+.hook-pagination-item-hover() { background-color: @pagination-item-hover-background; }
+
+.hook-pagination-item-active() { background-color: @pagination-item-active-background; }
+
+.hook-pagination-item-disabled() { background-color: @pagination-item-disabled-background; }
+
+// Item Mode
+.hook-pagination-item-hover() when (@internal-pagination-item-mode = flicker) {
+    animation: uk-flicker 0.2s ease both;
+}
+
+
+// Miscellaneous
+// ========================================================================
+
+// Next Previous Mode
+.hook-pagination-misc() when (@internal-pagination-item-next-previous-mode = animate) {
+
+    :hover > .uk-pagination-next { animation: uk-fade-right 0.3s reverse, uk-fade-left 0.2s 0.3s; }
+    :hover > .uk-pagination-previous { animation: uk-fade-left 0.3s reverse, uk-fade-right 0.2s 0.3s; }
+
+}
+
+.hook-pagination-misc() when not (@pagination-item-next-previous-color = inherit) {
+
+    .uk-pagination-next,
+    .uk-pagination-previous { color: @pagination-item-next-previous-color; }
+
+}
+
+.hook-pagination-misc() when not (@pagination-item-next-previous-hover-color = inherit) {
+
+    :hover > .uk-pagination-next,
+    :hover > .uk-pagination-previous { color: @pagination-item-next-previous-hover-color; }
+
+}
+
+
+// Inverse
+// ========================================================================
+
+@inverse-pagination-item-background:                    transparent;
+@inverse-pagination-item-hover-background:              transparent;
+@inverse-pagination-item-active-background:             transparent;
+@inverse-pagination-item-disabled-background:           transparent;
+
+@inverse-pagination-item-next-previous-color:           inherit;
+@inverse-pagination-item-next-previous-hover-color:     inherit;
+
+.hook-inverse-pagination-item() { background-color: @inverse-pagination-item-background; }
+.hook-inverse-pagination-item-hover() { background-color: @inverse-pagination-item-hover-background; }
+.hook-inverse-pagination-item-active() { background-color: @inverse-pagination-item-active-background; }
+.hook-inverse-pagination-item-disabled() { background-color: @inverse-pagination-item-disabled-background; }
+
+.hook-inverse() when not (@inverse-pagination-item-next-previous-color = inherit) {
+
+    .uk-pagination-next,
+    .uk-pagination-previous { color: @inverse-pagination-item-next-previous-color; }
+
+}
+
+.hook-inverse() when not (@inverse-pagination-item-next-previous-hover-color = inherit) {
+
+    :hover > .uk-pagination-next,
+    :hover > .uk-pagination-previous { color: @inverse-pagination-item-next-previous-hover-color; }
+
+}

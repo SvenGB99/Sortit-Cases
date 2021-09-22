@@ -1,0 +1,84 @@
+//
+// Component: Icon
+//
+// ========================================================================
+
+
+// Variables
+// ========================================================================
+
+@internal-icon-button-mode:                    ; // ripple
+
+
+// Style modifiers
+// ========================================================================
+
+//
+// Link
+//
+
+.hook-icon-link() {}
+
+.hook-icon-link-hover() {}
+
+.hook-icon-link-active() {}
+
+//
+// Button
+//
+
+.hook-icon-button() {
+    transition: 0.1s ease-in-out;
+    transition-property: color, background-color, background-size, border-color, box-shadow;
+}
+
+.hook-icon-button-hover() {}
+
+.hook-icon-button-active() {}
+
+//
+// Ripple
+//
+
+.hook-icon-button() when (@internal-icon-button-mode = ripple) {
+    background-position: 50% 100%;
+    background-size: 0% 0%;
+    background-repeat: no-repeat;
+    background-image: radial-gradient(farthest-side at 50% 100%, @icon-button-hover-background ~'calc(100% - 1px)', transparent 100%);
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(.165,.85,.45,1);
+}
+
+.hook-icon-button-hover() when (@internal-icon-button-mode = ripple) {
+    background-size: 150% 150%;
+    background-color: @icon-button-background;
+}
+
+.hook-icon-button-active() when (@internal-icon-button-mode = ripple) {
+    background-image: none;
+    transition-duration: 0s;
+}
+
+
+// Miscellaneous
+// ========================================================================
+
+.hook-icon-misc() {}
+
+
+// Inverse
+// ========================================================================
+
+.hook-inverse-icon-link() {}
+.hook-inverse-icon-link-hover() {}
+.hook-inverse-icon-link-active() {}
+
+.hook-inverse-icon-button() when (@internal-icon-button-mode = ripple2) {
+    background-image: radial-gradient(farthest-side at 50% 100%, @inverse-icon-button-hover-background ~'calc(100% - 1px)', transparent 100%);
+}
+.hook-inverse-icon-button-hover() when (@internal-icon-button-mode = ripple) {
+    background-color: @inverse-icon-button-background;
+}
+.hook-inverse-icon-button-active() when (@internal-icon-button-mode = ripple) {
+    background-image: none;
+}
